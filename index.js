@@ -70,13 +70,13 @@ class Projectile {
     this.position = position;
     this.velocity = velocity;
 
-    this.radius = 5;
+    this.radius = 3;
   }
 
   draw() {
     c.beginPath();
     c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-    c.fillStyle = "blue";
+    c.fillStyle = "red";
     c.fill();
     c.closePath();
   }
@@ -139,7 +139,7 @@ class Grid {
       y: 0,
     };
     this.velocity = {
-      x: 3,
+      x: 5,
       y: 1,
     };
     this.invaders = [];
@@ -178,7 +178,7 @@ class Grid {
   }
 }
 
-const grids = [new Grid()];
+const grids = [];
 
 const player = new Player();
 const projectiles = [];
@@ -191,7 +191,8 @@ const keys = {
     pressed: false,
   },
 };
-
+let frames = 0;
+let randomInterval = Math.floor(Math.random() * 500) + 500;
 function animate() {
   requestAnimationFrame(animate);
   c.fillStyle = "black";
@@ -199,8 +200,23 @@ function animate() {
 
   grids.forEach((grid) => {
     grid.update();
-    grid.invaders.forEach((invader) => {
+    grid.invaders.forEach((invader, i) => {
       invader.update({ velocity: grid.velocity });
+
+      projectiles.forEach((projectile, j) => {
+        if (
+          projectile.position.y - projectile.radius <=
+            invader.position.y + invader.height &&
+          projectile.position.x + projectile.radius >= invader.position.x &&
+          projectile.position.x - projectile.radius <= invader.position.x &&
+          projectile.position.y + projectile.radius >= invader.position.y
+        ) {
+          setTimeout(() => {
+            grid.invaders.splice(i, 1);
+            projectiles.splice(j, 1);
+          }, 0);
+        }
+      });
     });
   });
 
@@ -229,6 +245,13 @@ function animate() {
     player.rotation = 0;
     player.velocity.x = 0;
   }
+
+  if (frames % randomInterval == 0) {
+    grids.push(new Grid());
+    randomInterval = Math.floor(Math.random()) * 500 + 500;
+  }
+  frames++;
+  console.log(frames);
 }
 
 animate();
